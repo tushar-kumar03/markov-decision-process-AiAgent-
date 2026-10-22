@@ -1,2 +1,3 @@
 matplotlib
-flaskgunicorn
+flask
+gunicorn
