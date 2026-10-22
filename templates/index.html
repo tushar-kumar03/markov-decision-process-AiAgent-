@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MDP Robot Path Finder</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Prevent theme flicker on page load -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem("mdp-theme");
+
+            if (savedTheme === "light") {
+                document.documentElement.classList.add("light-mode");
+            }
+        })();
+    </script>
+
+</head>
+
+
+<body>
+
+
+<!-- ================= HEADER ================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            🤖
+        </div>
+
+        <div>
+
+            <h1>
+                MDP Robot Path Finder
+            </h1>
+
+            <p>
+                Intelligent Path Planning using Value Iteration
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="header-controls">
+
+        <div class="system-status">
+            ● SYSTEM ONLINE
+        </div>
+
+        <button
+            class="theme-toggle"
+            id="themeToggle"
+            type="button"
+            aria-label="Switch to light mode"
+            title="Switch theme">
+
+            <span id="themeIcon">
+                ☀️
+            </span>
+
+            <span id="themeText">
+                Light
+            </span>
+
+        </button>
+
+    </div>
+
+</header>
+
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="container">
+
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero">
+
+        <div>
+
+            <div class="eyebrow">
+                AI / MACHINE LEARNING PROJECT
+            </div>
+
+
+            <h2>
+                Intelligent Robot
+                <br>
+
+                <span>
+                    Path Planning
+                </span>
+            </h2>
+
+
+            <p>
+                Find the optimal path from Start to Goal
+                using Markov Decision Process and
+                Value Iteration.
+            </p>
+
+
+            <div class="hero-actions">
+
+                <a href="#simulation"
+                   class="primary-link">
+
+                    Explore Simulation
+
+                </a>
+
+
+                <a href="#how-it-works"
+                   class="secondary-link">
+
+                    How It Works
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="hero-visual">
+
+            <div class="orbit orbit-1"></div>
+
+            <div class="orbit orbit-2"></div>
+
+
+            <div class="floating-card card-a">
+                MDP
+            </div>
+
+            <div class="floating-card card-b">
+                VALUE ITERATION
+            </div>
+
+            <div class="floating-card card-c">
+                OPTIMAL PATH
+            </div>
+
+
+            <div class="hero-robot">
+                🤖
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================= METRICS ================= -->
+
+    <section class="metrics">
+
+
+        <div class="metric">
+
+            <div class="metric-icon">
+                🧠
+            </div>
+
+            <div>
+
+                <small>
+                    ALGORITHM
+                </small>
+
+                <strong>
+                    Value Iteration
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="metric">
+
+            <div class="metric-icon">
+                🔄
+            </div>
+
+            <div>
+
+                <small>
+                    ITERATIONS
+                </small>
+
+                <strong>
+                    {{ iterations }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="metric">
+
+            <div class="metric-icon">
+                📍
+            </div>
+
+            <div>
+
+                <small>
+                    START
+                </small>
+
+                <strong>
+                    (0, 0)
+                </strong>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="metric">
+
+            <div class="metric-icon">
+                🎯
+            </div>
+
+            <div>
+
+                <small>
+                    GOAL
+                </small>
+
+                <strong>
+                    (4, 4)
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+
+    <!-- ================= SIMULATION ================= -->
+
+    <section class="workspace"
+             id="simulation">
+
+
+        <!-- ========== GRID ========== -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+
+                <div>
+
+                    <div class="section-label">
+                        SIMULATION
+                    </div>
+
+                    <h2>
+                        🗺️ Grid World
+                    </h2>
+
+                    <p>
+                        Optimal policy and robot navigation
+                    </p>
+
+                </div>
+
+
+                <div class="grid-badge">
+                    5 × 5 GRID
+                </div>
+
+            </div>
+
+
+
+            <!-- GRID -->
+
+            <div id="grid">
+
+
+                {% for row in range(5) %}
+
+                    {% for col in range(5) %}
+
+                        {% set state = (row, col) %}
+
+
+                        <div class="cell"
+                             data-row="{{ row }}"
+                             data-col="{{ col }}">
+
+
+                            <!-- START -->
+
+                            {% if state == (0, 0) %}
+
+                                <div class="special start">
+
+                                    <small>
+                                        START
+                                    </small>
+
+                                    <b>
+                                        S
+                                    </b>
+
+                                </div>
+
+
+                            <!-- GOAL -->
+
+                            {% elif state == (4, 4) %}
+
+                                <div class="special goal">
+
+                                    <small>
+                                        GOAL
+                                    </small>
+
+                                    <b>
+                                        G
+                                    </b>
+
+                                </div>
+
+
+                            <!-- OBSTACLE -->
+
+                            {% elif state in [(1,1), (1,2), (2,3), (3,1)] %}
+
+                                <div class="blocked">
+
+                                    <b>
+                                        ×
+                                    </b>
+
+                                    <small>
+                                        BLOCKED
+                                    </small>
+
+                                </div>
+
+
+                            <!-- NORMAL STATE -->
+
+                            {% else %}
+
+                                <span class="value">
+
+                                    {{ "%.1f"|format(values[state]) }}
+
+                                </span>
+
+
+                                <span class="arrow">
+
+
+                                    {% if policy[state] == "UP" %}
+
+                                        ↑
+
+                                    {% elif policy[state] == "DOWN" %}
+
+                                        ↓
+
+                                    {% elif policy[state] == "LEFT" %}
+
+                                        ←
+
+                                    {% elif policy[state] == "RIGHT" %}
+
+                                        →
+
+                                    {% endif %}
+
+
+                                </span>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    {% endfor %}
+
+                {% endfor %}
+
+
+            </div>
+
+
+
+            <!-- LEGEND -->
+
+            <div class="legend">
+
+                <div>
+                    🟢 Start
+                </div>
+
+                <div>
+                    🟠 Goal
+                </div>
+
+                <div>
+                    ⬛ Obstacle
+                </div>
+
+                <div>
+                    → Optimal Policy
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+        <!-- ========== ROBOT CONTROL ========== -->
+
+        <div class="panel">
+
+
+            <div class="panel-title">
+
+                <div>
+
+                    <div class="section-label">
+                        LIVE CONTROL
+                    </div>
+
+                    <h2>
+                        🤖 Robot Control
+                    </h2>
+
+                    <p>
+                        Control and monitor the robot
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ROBOT SCREEN -->
+
+            <div class="robot-screen">
+
+                <div id="robot-face">
+                    🤖
+                </div>
+
+
+                <div class="status-main"
+                     id="status">
+
+                    READY TO NAVIGATE
+
+                </div>
+
+
+                <p id="status-description">
+
+                    Press Run Robot to start the simulation.
+
+                </p>
+
+            </div>
+
+
+
+            <!-- LIVE STATS -->
+
+            <div class="live-stats">
+
+
+                <div>
+
+                    <small>
+                        CURRENT POSITION
+                    </small>
+
+                    <strong id="robot-position">
+                        (0, 0)
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        CURRENT STEP
+                    </small>
+
+                    <strong id="robot-step">
+                        0
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        PATH LENGTH
+                    </small>
+
+                    <strong>
+                        {{ path|length - 1 }}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        TOTAL REWARD
+                    </small>
+
+                    <strong id="total-reward">
+                        Calculated
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- PROGRESS -->
+
+            <div class="progress-wrap">
+
+                <div class="progress-head">
+
+                    <span>
+                        PATH PROGRESS
+                    </span>
+
+                    <span id="progress-text">
+                        0%
+                    </span>
+
+                </div>
+
+
+                <div class="progress">
+
+                    <div id="progress-bar"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BUTTONS -->
+
+            <div class="buttons">
+
+
+                <button
+                    class="run-button"
+                    id="runButton"
+                    onclick="runRobot()">
+
+                    ▶ RUN ROBOT
+
+                </button>
+
+
+                <button
+                    class="reset-button"
+                    onclick="resetRobot()">
+
+                    ↻ RESET
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+
+
+    <!-- ================= HOW IT WORKS ================= -->
+
+    <section class="how"
+             id="how-it-works">
+
+
+        <div class="section-heading">
+
+            <div class="section-label">
+                HOW IT WORKS
+            </div>
+
+            <h2>
+                From MDP to Optimal Path
+            </h2>
+
+            <p>
+                Four simple steps transform the problem
+                into an intelligent robot decision.
+            </p>
+
+        </div>
+
+
+
+        <div class="flow">
+
+
+            <!-- STEP 1 -->
+
+            <div class="flow-card">
+
+                <span>
+                    STEP 01
+                </span>
+
+                <div class="flow-icon">
+                    🌐
+                </div>
+
+                <h3>
+                    Define Environment
+                </h3>
+
+                <p>
+                    A 5×5 grid is created with a
+                    Start, Goal and obstacles.
+                </p>
+
+            </div>
+
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+
+
+            <!-- STEP 2 -->
+
+            <div class="flow-card">
+
+                <span>
+                    STEP 02
+                </span>
+
+                <div class="flow-icon">
+                    🎁
+                </div>
+
+                <h3>
+                    Assign Rewards
+                </h3>
+
+                <p>
+                    The robot receives rewards for
+                    reaching the goal and penalties
+                    for movements.
+                </p>
+
+            </div>
+
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+
+
+            <!-- STEP 3 -->
+
+            <div class="flow-card">
+
+                <span>
+                    STEP 03
+                </span>
+
+                <div class="flow-icon">
+                    🧠
+                </div>
+
+                <h3>
+                    Value Iteration
+                </h3>
+
+                <p>
+                    The algorithm calculates the value
+                    of every possible state.
+                </p>
+
+            </div>
+
+
+            <div class="flow-arrow">
+                →
+            </div>
+
+
+
+            <!-- STEP 4 -->
+
+            <div class="flow-card">
+
+                <span>
+                    STEP 04
+                </span>
+
+                <div class="flow-icon">
+                    🎯
+                </div>
+
+                <h3>
+                    Find Optimal Path
+                </h3>
+
+                <p>
+                    The robot follows the optimal
+                    policy to reach the goal.
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- FORMULA -->
+
+        <div class="formula">
+
+            <span>
+                VALUE ITERATION EQUATION
+            </span>
+
+            <code>
+                V(s) = max [ R(s,a) + γV(s') ]
+            </code>
+
+            <p>
+                The best action is selected based on
+                maximum expected future value.
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+
+
+    <!-- ================= TECHNOLOGY ================= -->
+
+    <section class="tech">
+
+        <div>
+
+            <div class="section-label">
+                TECHNOLOGY
+            </div>
+
+            <h2>
+                Built With
+            </h2>
+
+        </div>
+
+
+        <div class="tech-items">
+
+            <span>
+                🐍 Python
+            </span>
+
+            <span>
+                🌐 Flask
+            </span>
+
+            <span>
+                📊 Matplotlib
+            </span>
+
+            <span>
+                🧠 MDP
+            </span>
+
+            <span>
+                ⚡ Value Iteration
+            </span>
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <p>
+        MDP-Based Intelligent Robot Path Finder
+    </p>
+
+    <span>
+        B.Tech CSE AIML • AI & Machine Learning Project
+    </span>
+
+</footer>
+
+
+
+
+<!-- ================= JAVASCRIPT DATA ================= -->
+
+<script>
+
+    const robotPath = {{ path|tojson }};
+
+    const totalReward =
+        {{ total_reward|default(93) }};
+
+</script>
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+
+</body>
+
+</html>
